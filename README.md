@@ -50,7 +50,7 @@ be notified when a command is received.
 
 Event parameters include an instance of
 [`CommandEvent`](https://github.com/phergie/phergie-irc-plugin-react-command/blob/master/src/CommandEvent.php)
-(a subclass of [`UserEvent`](https://github.com/phergie/phergie-irc-event/blob/master/src/UserEvent.php)
+(a subclass of [`UserEvent`](https://github.com/phergie/phergie-irc-event/blob/master/src/UserEvent.php))
 that contains data about the parsed command and any other parameters that
 accompanied the original event that contained the command (e.g. an object that implements
 [`EventQueueInterface`](https://github.com/phergie/phergie-irc-bot-react/blob/master/src/EventQueueInterface.php)).
