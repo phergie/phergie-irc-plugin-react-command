@@ -45,6 +45,14 @@ class Plugin extends AbstractPlugin
     protected $paramsPattern = '/"(?:[^\\"]|\\"?)+"|[^\s"]+/';
 
     /**
+     * Pattern used to identify channel names
+     *
+     * @var string
+     * @see http://tools.ietf.org/html/rfc2812#section-1.3
+     */
+    protected $channelPattern = '/^[&#+!](?:[^ \cG,]+)$/';
+
+    /**
      * Flag indicating whether to check for the bot being address by its
      * connection nick as a command prefix
      *
@@ -134,12 +142,16 @@ class Plugin extends AbstractPlugin
         // Verify this event contains a command and remove the substring
         // identifying it as one
         $eventParams = $event->getParams();
+        $target = $event->getCommand() === 'PRIVMSG'
+            ? $eventParams['receivers']
+            : $eventParams['nickname'];
         $message = $eventParams['text'];
         if ($identity) {
-            if (!preg_match($identity, $message, $match)) {
+            if (preg_match($identity, $message, $match)) {
+                $message = str_replace($match[0], '', $message);
+            } elseif (preg_match($this->channelPattern, $target)) {
                 return;
             }
-            $message = str_replace($match[0], '', $message);
         }
 
         // Parse the command and its parameters

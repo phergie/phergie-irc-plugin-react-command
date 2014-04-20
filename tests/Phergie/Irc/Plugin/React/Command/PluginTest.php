@@ -41,36 +41,67 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         $data = array();
 
         $commands = array(
-            'PRIVMSG',
-            'NOTICE',
+            'PRIVMSG' => 'receivers',
+            'NOTICE' => 'nickname',
         );
+
+        $message = 'foo bar "two words" baz';
+
+        $prefixConfig = array('prefix' => '!');
+        $patternConfig = array('pattern' => '/^~/');
+        $nickConfig = array('nick' => true);
 
         $configs = array(
             'foo' => array(),
-            '!foo bar "two words" baz' => array('prefix' => '!'),
-            '~foo bar "two words" baz' => array('pattern' => '/^~/'),
-            'nickname foo bar "two words" baz' => array('nick' => true),
-            'nickname: foo bar "two words" baz' => array('nick' => true),
-            ' nickname, foo bar "two words" baz' => array('nick' => true),
+            '!' . $message => $prefixConfig,
+            '~' . $message => $patternConfig,
+            'nickname ' . $message => $nickConfig,
+            'nickname: ' . $message => $nickConfig,
+            ' nickname, ' . $message => $nickConfig,
         );
 
         $expectedParams = array('bar', 'two words', 'baz');
 
-        foreach ($commands as $command) {
+        $targets = array('#channel', 'user');
+
+        $getEvent = function($command, $targetField, $text, $config, $target) {
+            $event = Phake::mock('\Phergie\Irc\Event\UserEventInterface');
+            $connection = Phake::mock('\Phergie\Irc\ConnectionInterface');
+            $params = array('text' => $text, $targetField => $target);
+            Phake::when($connection)->getNickname()->thenReturn('nickname');
+            Phake::when($event)->getConnection()->thenReturn($connection);
+            Phake::when($event)->getCommand()->thenReturn($command);
+            Phake::when($event)->getParams()->thenReturn($params);
+            Phake::when($event)->getTargets()->thenReturn(array());
+            return $event;
+        };
+
+        foreach ($commands as $command => $targetField) {
             foreach ($configs as $text => $config) {
-                $event = Phake::mock('\Phergie\Irc\Event\UserEventInterface');
-                $connection = Phake::mock('\Phergie\Irc\ConnectionInterface');
-                $params = array('text' => $text);
-
-                Phake::when($connection)->getNickname()->thenReturn('nickname');
-                Phake::when($event)->getConnection()->thenReturn($connection);
-                Phake::when($event)->getCommand()->thenReturn($command);
-                Phake::when($event)->getParams()->thenReturn($params);
-                Phake::when($event)->getTargets()->thenReturn(array());
-
-                $data[] = array($config, $event, $text == 'foo' ? array() : $expectedParams);
+                foreach ($targets as $target) {
+                    $event = $getEvent($command, $targetField, $text, $config, $target);
+                    $data[] = array($config, $event, $text == 'foo' ? array() : $expectedParams);
+                }
             }
         }
+
+        // Events sent directly to the bot should always be interpreted as
+        // potential commands
+        $data[] = array(
+            $prefixConfig,
+            $getEvent('PRIVMSG', $commands['PRIVMSG'], $message, $prefixConfig, 'user'),
+            $expectedParams
+        );
+        $data[] = array(
+            $patternConfig,
+            $getEvent('PRIVMSG', $commands['PRIVMSG'], $message, $patternConfig, 'user'),
+            $expectedParams
+        );
+        $data[] = array(
+            $patternConfig,
+            $getEvent('PRIVMSG', $commands['PRIVMSG'], $message, $nickConfig, 'user'),
+            $expectedParams
+        );
 
         return $data;
     }
@@ -111,8 +142,8 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         $data = array();
 
         $commands = array(
-            'PRIVMSG',
-            'NOTICE',
+            'PRIVMSG' => 'receivers',
+            'NOTICE' => 'nickname',
         );
 
         $configs = array(
@@ -124,11 +155,11 @@ class PluginTest extends \PHPUnit_Framework_TestCase
             ' foo bar "two words" baz' => array('nick' => true),
         );
 
-        foreach ($commands as $command) {
+        foreach ($commands as $command => $targetField) {
             foreach ($configs as $text => $config) {
                 $event = Phake::mock('\Phergie\Irc\Event\UserEventInterface');
                 $connection = Phake::mock('\Phergie\Irc\ConnectionInterface');
-                $params = array('text' => $text);
+                $params = array('text' => $text, $targetField => '#channel');
 
                 Phake::when($connection)->getNickname()->thenReturn('nickname');
                 Phake::when($event)->getConnection()->thenReturn($connection);
