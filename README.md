@@ -66,7 +66,7 @@ class FooPlugin implements PluginInterface
 {
     public function getSubscribedEvents()
     {
-        return 'command.foo' => 'handleFooCommand',
+        return array('command.foo' => 'handleFooCommand');
     }
 
     public function handleFooCommand(CommandEvent $event, EventQueueInterface $queue)
