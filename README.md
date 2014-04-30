@@ -3,6 +3,10 @@
 A plugin for [Phergie](http://github.com/phergie/phergie-irc-bot-react/) to
 parse commands issued to the bot.
 
+A common plugin to use in combination with this one is the
+[CommandHelp plugin](https://github.com/phergie/phergie-irc-plugin-react-commandhelp/),
+which provides information about available commands and their usage to users.
+
 [![Build Status](https://secure.travis-ci.org/phergie/phergie-irc-plugin-react-command.png?branch=master)](http://travis-ci.org/phergie/phergie-irc-plugin-react-command)
 
 ## Install
