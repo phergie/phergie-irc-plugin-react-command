@@ -8,11 +8,12 @@
  * @package Phergie\Irc\Plugin\React\Command
  */
 
-namespace Phergie\Irc\Plugin\React\Command;
+namespace Phergie\Irc\Tests\Plugin\React\Command;
 
 use Phake;
 use Phergie\Irc\Bot\React\EventQueueInterface;
 use Phergie\Irc\Event\UserEventInterface;
+use Phergie\Irc\Plugin\React\Command\Plugin;
 
 /**
  * Tests for the Plugin class.

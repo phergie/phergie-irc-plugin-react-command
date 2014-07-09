@@ -8,11 +8,12 @@
  * @package Phergie\Irc\Plugin\React\Command
  */
 
-namespace Phergie\Irc\Plugin\React\Command;
+namespace Phergie\Irc\Tests\Plugin\React\Command;
 
 use Phake;
 use Phergie\Irc\ConnectionInterface;
 use Phergie\Irc\Event\UserEvent;
+use Phergie\Irc\Plugin\React\Command\CommandEvent;
 
 /**
  * Tests for the CommandEvent class.
