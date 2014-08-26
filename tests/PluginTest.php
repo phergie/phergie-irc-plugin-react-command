@@ -193,4 +193,71 @@ class PluginTest extends \PHPUnit_Framework_TestCase
 
         Phake::verify($eventEmitter, Phake::never())->emit('command.foo', $this->isType('array'));
     }
+
+    /**
+     * Data provider for testParseCommandDoesNotOverstripPatternMatch().
+     *
+     * @return array
+     */
+    public function dataProviderParseCommandDoesNotOverstripPatternMatch()
+    {
+        $data = array();
+
+        $commands = array(
+            'PRIVMSG' => 'receivers',
+            'NOTICE' => 'nickname',
+        );
+
+        $message = 'foo "~~nickname!~~"';
+
+        $configs = array(
+            '!' . $message => array('prefix' => '!'),
+            '~' . $message => array('pattern' => '/^~/'),
+            'nickname ' . $message => array('nick' => true),
+        );
+
+        foreach ($commands as $command => $targetField) {
+            foreach ($configs as $text => $config) {
+                $event = Phake::mock('\Phergie\Irc\Event\UserEventInterface');
+                $connection = Phake::mock('\Phergie\Irc\ConnectionInterface');
+                $params = array('text' => $text, $targetField => '#channel');
+
+                Phake::when($connection)->getNickname()->thenReturn('nickname');
+                Phake::when($event)->getConnection()->thenReturn($connection);
+                Phake::when($event)->getCommand()->thenReturn($command);
+                Phake::when($event)->getParams()->thenReturn($params);
+                Phake::when($event)->getTargets()->thenReturn(array());
+
+                $data[] = array($config, $event);
+            }
+        }
+
+        return $data;
+    }
+    /**
+     * Tests parseCommand() under conditions where it may strip too much from a
+     * message.
+     *
+     * @param array $config Plugin configuration
+     * @param \Phergie\Irc\Event\UserEventInterface $event
+     * @dataProvider dataProviderParseCommandDoesNotOverstripPatternMatch
+     */
+    public function testParseCommandDoesNotOverstripPatternMatch(array $config, UserEventInterface $event)
+    {
+        $queue = Phake::mock('Phergie\Irc\Bot\React\EventQueueInterface');
+        $eventEmitter = Phake::mock('\Evenement\EventEmitterInterface');
+
+        $plugin = new Plugin($config);
+        $plugin->setEventEmitter($eventEmitter);
+        $plugin->parseCommand($event, $queue);
+ 
+        $expectedParams = array('~~nickname!~~');
+
+        Phake::verify($eventEmitter)->emit('command.foo', Phake::capture($commandEventParams));
+        $commandEvent = $commandEventParams[0];
+        $this->assertInstanceOf('\Phergie\Irc\Plugin\React\Command\CommandEvent', $commandEvent);
+        $this->assertSame('foo', $commandEvent->getCustomCommand());
+        $this->assertSame($expectedParams, $commandEvent->getCustomParams());
+        $this->assertSame($queue, $commandEventParams[1]);
+    }
 }
