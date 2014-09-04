@@ -155,7 +155,9 @@ class Plugin extends AbstractPlugin
         }
 
         // Parse the command and its parameters
-        preg_match($this->commandPattern, $message, $match);
+        if (!preg_match($this->commandPattern, $message, $match)) {
+            return;
+        }
         $customCommand = $match['command'];
         if (!empty($match['params'])
             && preg_match_all($this->paramsPattern, $match['params'], $matches)) {
