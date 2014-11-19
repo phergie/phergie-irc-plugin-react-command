@@ -148,14 +148,16 @@ class Plugin extends AbstractPlugin
         $message = $eventParams['text'];
         if ($identity) {
             if (preg_match($identity, $message, $match)) {
-                $message = str_replace($match[0], '', $message);
+                $message = preg_replace($identity, '', $message);
             } elseif (preg_match($this->channelPattern, $target)) {
                 return;
             }
         }
 
         // Parse the command and its parameters
-        preg_match($this->commandPattern, $message, $match);
+        if (!preg_match($this->commandPattern, $message, $match)) {
+            return;
+        }
         $customCommand = $match['command'];
         if (!empty($match['params'])
             && preg_match_all($this->paramsPattern, $match['params'], $matches)) {
