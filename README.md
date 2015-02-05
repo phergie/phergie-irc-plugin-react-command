@@ -28,7 +28,8 @@ See Phergie documentation for more information on installing plugins.
 ```php
 new \Phergie\Irc\Plugin\React\Command\Plugin(array(
 
-    // All configuration is optional
+    // Select how you'd like the command to be triggered. 
+    // Only 1 method supported at a time so make sure to remove unused methods.
 
     'prefix' => '!', // string denoting the start of a command
 
