@@ -13,12 +13,8 @@ which provides information about available commands and their usage to users.
 
 The recommended method of installation is [through composer](http://getcomposer.org).
 
-```JSON
-{
-    "require": {
-        "phergie/phergie-irc-plugin-react-command": "2.*"
-    }
-}
+```
+composer require phergie/phergie-irc-plugin-react-command
 ```
 
 See Phergie documentation for more information on installing plugins.
