@@ -1,4 +1,5 @@
 {
+    "abandoned": true,
     "name": "phergie/phergie-irc-plugin-react-command",
     "description": "Phergie plugin for parsing commands issued to the bot",
     "keywords": [ "irc", "bot", "react", "plugin" ],
